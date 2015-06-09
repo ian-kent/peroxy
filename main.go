@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -34,7 +35,25 @@ func browserAgentStream(w http.ResponseWriter, req *http.Request) {
 func browserAgentSwitch(w http.ResponseWriter, req *http.Request) {
 	proxying = req.URL.Query().Get("proxy")
 	url = req.URL.Query().Get("url")
-	stream.Notify("data", []byte(url))
+	eval := req.URL.Query().Get("eval")
+
+	if len(proxying) == 0 && len(url) == 0 && len(eval) > 0 {
+		r := map[string]string{
+			"eval": eval,
+		}
+		b, _ := json.Marshal(&r)
+		stream.Notify("data", b)
+		return
+	}
+
+	if len(url) == 0 {
+		url = "/"
+	}
+	r := map[string]string{
+		"url": url,
+	}
+	b, _ := json.Marshal(&r)
+	stream.Notify("data", b)
 }
 
 func browserAgentProxy(w http.ResponseWriter, req *http.Request) {
@@ -134,10 +153,12 @@ var script = `
   src.addEventListener('message', function(e) {
     console.log("Event source message:")
     console.log(e)
-		if(e.data) {
-	    window.location.href=e.data;
-		} else {
-			window.location.href="/";
+		ev = JSON.parse(e.data)
+		if (ev.url) {
+			window.location.href=ev.url;
+		}
+		if (ev.eval) {
+			eval(ev.eval);
 		}
   }, false)
   src.addEventListener('error', function(e) {

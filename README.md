@@ -29,6 +29,11 @@ From the command line:
 ~> curl http://your-ip-address:3123/!-switch?proxy=https://www.mozilla.org&url=/
 ```
 
+Evaluate some javascript:
+```bash
+~> curl http://your-ip-address:3123/!-switch?eval=alert\(\'hi\'\)\;
+```
+
 ### Licence
 
 Copyright ©‎ 2015, Ian Kent (http://iankent.uk).
