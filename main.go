@@ -123,6 +123,7 @@ func browserAgentProxy(w http.ResponseWriter, req *http.Request) {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", cl))
 	}
 
+	w.Header().Del("Content-Security-Policy")
 	w.Header().Set("Cache-Control", "private, max-age=0, no-cache")
 	w.Write([]byte(sb))
 }
