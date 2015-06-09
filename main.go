@@ -88,6 +88,12 @@ func browserAgentProxy(w http.ResponseWriter, req *http.Request) {
 
 	r, err := http.NewRequest(req.Method, u, bytes.NewReader(rb))
 
+	for h, v := range req.Header {
+		for _, v2 := range v {
+			r.Header.Add(h, v2)
+		}
+	}
+
 	res, err := http.DefaultClient.Do(r)
 	if err != nil {
 		message := fmt.Sprintf("error proxying %s: %s", proxying, err)
@@ -125,6 +131,8 @@ func browserAgentProxy(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Del("Content-Security-Policy")
 	w.Header().Set("Cache-Control", "private, max-age=0, no-cache")
+
+	w.WriteHeader(res.StatusCode)
 	w.Write([]byte(sb))
 }
 
